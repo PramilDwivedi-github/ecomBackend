@@ -36,11 +36,11 @@ app.use((error, req, res, next) => {
   res.send(error.message);
 });
 
-const port = 3000;
+// const port = 3000;
 
 db.sync()
   .then((res) => {
-    app.listen(port, () => {
+    app.listen(process.env.PORT, () => {
       console.log("app runnning!");
       console.log(process.env.tokenKey);
     });
