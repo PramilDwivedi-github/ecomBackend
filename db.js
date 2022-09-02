@@ -7,11 +7,11 @@ const seq = require("sequelize");
 // })
 
 const db = new seq(
-  "d7pgf35kdo9sps",
-  "gmdpwkiykpkfaw",
-  "786d3bac3d459d85f615f8560a6f5c02f359876c2ee0247b22a06465c9979d0b",
+  "d297vcufotbto",
+  "gwhhixufputqrm",
+  "a8785ae88126a967c04faf661bc2c4c6477db665311e61adc0d2eb84931009af",
   {
-    host: "ec2-107-22-245-82.compute-1.amazonaws.com",
+    host: "ec2-54-159-175-38.compute-1.amazonaws.com",
     dialect: "postgres",
     port: 5432,
   }
