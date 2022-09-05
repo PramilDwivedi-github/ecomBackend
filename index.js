@@ -3,6 +3,7 @@ const express = require("express");
 const bodyparser = require("body-parser");
 const db = require("./db");
 const dotenv = require("dotenv");
+const cors = require("cors");
 
 // const User = require("./models/user")
 const {
