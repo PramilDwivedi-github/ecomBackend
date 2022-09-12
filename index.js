@@ -47,7 +47,7 @@ app.use("/buyer", buyerRouter);
 app.use("/product", productRouter);
 
 app.use((error, req, res, next) => {
-  console.log(error.message);
+  console.log(error);
   res.send(error.message);
 });
 
