@@ -16,14 +16,14 @@ const Product = db.define("Product", {
     allowNull: false,
   },
   img: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   price: {
     type: DataTypes.FLOAT,
     allowNull: false,
   },
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   available: {
     type: DataTypes.STRING,

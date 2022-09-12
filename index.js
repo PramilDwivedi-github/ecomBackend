@@ -53,7 +53,7 @@ app.use((error, req, res, next) => {
 
 // const port = 3000;
 
-db.sync()
+db.sync({ force: true })
   .then((res) => {
     app.listen(process.env.PORT, () => {
       console.log("app runnning!");
