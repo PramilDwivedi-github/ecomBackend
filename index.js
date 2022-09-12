@@ -38,7 +38,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 //body parser middleware
-app.use(bodyparser.json());
+app.use(bodyparser.json({ limit: "15360mb" }));
 
 dotenv.config();
 
