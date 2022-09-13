@@ -82,7 +82,7 @@ const addCartItem = async (req, res, next) => {
     } else {
       const newItem = await CartItem.create({
         product_id: req.body.product_id,
-        seller_id: req.body.seller_id,
+        seller_id: req.body.SellerId,
         copies: req.body.copies,
       });
       await buyer.addCartItem(newItem);
