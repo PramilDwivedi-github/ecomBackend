@@ -8,6 +8,7 @@ const {
   mycart,
   removeCartItem,
   placeOrder,
+  myorders,
 } = require("../services/buyerService");
 
 const buyerRouter = express.Router();
@@ -23,5 +24,6 @@ buyerRouter.get("/api/mycart", mycart);
 buyerRouter.delete("/api/removeCartItem", removeCartItem);
 
 buyerRouter.post("/api/placeOrder", placeOrder);
+buyerRouter.get("/api/myorders", myorders);
 
 module.exports = buyerRouter;

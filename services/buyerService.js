@@ -1,3 +1,4 @@
+const { response } = require("express");
 const sellerRouter = require("../controller/sellerController");
 const {
   Buyer,
@@ -216,6 +217,41 @@ const placeOrder = async (req, res, next) => {
   }
 };
 
+const myorders = async (req, res, next) => {
+  try {
+    const userResponse = [];
+    const user_orders = await Order.findAll({
+      where: { BuyerId: req.UserData.id },
+    });
+
+    for await (let order of user_orders) {
+      let orderDetail = {};
+      let order_items = await order.getOrderItems();
+      let products = [];
+      for await (let item of order_items) {
+        let order_item = {};
+        let product = await Product.findByPk(item.product_id);
+        let seller = await Seller.findByPk(item.seller_id);
+        order_item.product = product;
+        order_item.seller = {
+          email: seller.email,
+          phone: seller.phone,
+          name: seller.name,
+          address: seller.address,
+        };
+        orderDetail.order = order;
+        orderDetail.details = order_item;
+      }
+      userResponse.push(orderDetail);
+    }
+
+    res.status(200).json({ message: "success", orders: userResponse });
+  } catch (e) {
+    e.message = "unable to find orders";
+    next(e);
+  }
+};
+
 module.exports = {
   registerBuyer,
   loginBuyer,
@@ -224,4 +260,5 @@ module.exports = {
   mycart,
   removeCartItem,
   placeOrder,
+  myorders,
 };

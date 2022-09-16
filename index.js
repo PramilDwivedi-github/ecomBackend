@@ -48,7 +48,7 @@ app.use("/product", productRouter);
 
 app.use((error, req, res, next) => {
   console.log(error);
-  res.send(error.message);
+  res.send({ message: error.message });
 });
 
 // const port = 3000;
