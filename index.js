@@ -24,7 +24,10 @@ const sellerRouter = require("./controller/sellerController");
 const buyerRouter = require("./controller/buyerController");
 const productRouter = require("./controller/productController");
 // cors issue
-const whitelist = ["http://localhost:3000"];
+const whitelist = [
+  "http://localhost:3000",
+  "https://6326ed6cc1fda70e50d5fd32--chic-yeot-0b2714.netlify.app/",
+];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
