@@ -227,6 +227,7 @@ const myorders = async (req, res, next) => {
     for await (let order of user_orders) {
       let orderDetail = {
         items: [],
+        cost: 0.0,
       };
       orderDetail.order = order;
       let order_items = await order.getOrderItems();
@@ -242,7 +243,9 @@ const myorders = async (req, res, next) => {
           name: seller.name,
           address: seller.address,
         };
-
+        order_item.copies = item.copies;
+        order_item.cost = item.copies * product.price;
+        orderDetail.cost += order_item.cost;
         orderDetail.items.push(order_item);
       }
       userResponse.push(orderDetail);
