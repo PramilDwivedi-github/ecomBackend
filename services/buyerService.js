@@ -225,9 +225,12 @@ const myorders = async (req, res, next) => {
     });
 
     for await (let order of user_orders) {
-      let orderDetail = {};
+      let orderDetail = {
+        items: [],
+      };
+      orderDetail.order = order;
       let order_items = await order.getOrderItems();
-      let products = [];
+
       for await (let item of order_items) {
         let order_item = {};
         let product = await Product.findByPk(item.product_id);
@@ -239,8 +242,8 @@ const myorders = async (req, res, next) => {
           name: seller.name,
           address: seller.address,
         };
-        orderDetail.order = order;
-        orderDetail.details = order_item;
+
+        orderDetail.items.push(order_item);
       }
       userResponse.push(orderDetail);
     }
