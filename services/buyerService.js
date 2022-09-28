@@ -9,6 +9,7 @@ const {
   Sale,
   Seller,
   SaleItem,
+  UserImage,
 } = require("../models");
 const { generateToken } = require("../services/authService");
 
@@ -62,6 +63,27 @@ const getBuyer = async (req, res, next) => {
   }
 };
 
+const addProfileImg = async (req, res, next) => {
+  try {
+    const buyer = await Buyer.findByPk(req.UserData.id);
+    const image = await buyer.getUserImage();
+
+    if (image) {
+      await UserImage.update(
+        { img: req.body.userImage },
+        { where: { BuyerId: req.UserData.id } }
+      );
+      res.send({ message: "Updated" });
+    } else {
+      const uploadedImage = await UserImage.create({ img: req.body.userImage });
+      await uploadedImage.setBuyer(buyer);
+      res.send({ message: "Upload Successfull", img: uploadedImage });
+    }
+  } catch (e) {
+    e.message = "unable to add image";
+  }
+};
+
 const addCartItem = async (req, res, next) => {
   try {
     const buyer = await Buyer.findByPk(req.UserData.id);
@@ -75,7 +97,7 @@ const addCartItem = async (req, res, next) => {
     if (check.length === 1) {
       let updatedCopies =
         check[0].copies + (req.body.copies ? req.body.copies : 1);
-      CartItem.update(
+      await CartItem.update(
         { copies: updatedCopies },
         { where: { item_id: check[0].item_id } }
       );
@@ -267,4 +289,5 @@ module.exports = {
   removeCartItem,
   placeOrder,
   myorders,
+  addProfileImg,
 };

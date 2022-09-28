@@ -9,6 +9,7 @@ const {
   removeCartItem,
   placeOrder,
   myorders,
+  addProfileImg,
 } = require("../services/buyerService");
 
 const buyerRouter = express.Router();
@@ -25,5 +26,5 @@ buyerRouter.delete("/api/removeCartItem", removeCartItem);
 
 buyerRouter.post("/api/placeOrder", placeOrder);
 buyerRouter.get("/api/myorders", myorders);
-
+buyerRouter.post("/api/profileImage", addProfileImg);
 module.exports = buyerRouter;
