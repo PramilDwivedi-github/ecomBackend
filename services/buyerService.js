@@ -56,7 +56,8 @@ const loginBuyer = async (req, res, next) => {
 const getBuyer = async (req, res, next) => {
   try {
     const data = await Buyer.findOne({ where: { email: req.UserData.email } });
-    res.status(200).send({ message: "success", data });
+    const img = await data.getUserImage();
+    res.status(200).send({ message: "success", data, img });
   } catch (e) {
     e.message = "Unable to fetch data right now";
     next(e);
