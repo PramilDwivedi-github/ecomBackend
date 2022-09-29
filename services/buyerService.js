@@ -1,4 +1,6 @@
 const { response } = require("express");
+const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
 const sellerRouter = require("../controller/sellerController");
 const {
   Buyer,
@@ -12,7 +14,7 @@ const {
   UserImage,
 } = require("../models");
 const { generateToken } = require("../services/authService");
-const { sendEmail, mailTransporter } = require("./emailService");
+const { sendEmail } = require("./emailService");
 
 const registerBuyer = async (req, res, next) => {
   try {
@@ -238,6 +240,27 @@ const placeOrder = async (req, res, next) => {
     res.send({ message: "order placed", data: newOrder });
 
     // sending email to buyer
+
+    const oAuth2Client = new google.auth.OAuth2(
+      process.env.CLIENT_ID,
+      process.env.CLIENT_SECRET,
+      process.env.REDIRECT_URI
+    );
+    oAuth2Client.setCredentials({ refresh_token: process.env.REFRESH_TOKEN });
+    const access_token = await oAuth2Client.getAccessToken();
+
+    const mailTransporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        type: "OAuth2",
+        user: process.env.email,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN,
+        accessToken: access_token,
+      },
+    });
+
     const firstOrderItem = await Product.findByPk(newOrderItems[0].product_id);
     let buyerText = `Greetings from Shopzee ,
     your order of ${firstOrderItem.name} and ${newOrderItems.length - 1}
@@ -251,8 +274,8 @@ const placeOrder = async (req, res, next) => {
       text: buyerText,
     };
 
-    const result = await sendEmail(mailTransporter, buyerEmailDetails);
-    if (result !== "success") next(new Error(result));
+    const result = await sendEmail(buyerEmailDetails, mailTransporter);
+    if (result !== "success") next(result);
 
     // sending email to seller
     const sellerEmailDetails = {
@@ -274,7 +297,7 @@ const placeOrder = async (req, res, next) => {
       } , please process the order delivery.
       `;
       sellerEmailDetails.text = sellerText;
-      let result = await sendEmail(mailTransporter, sellerEmailDetails);
+      let result = await sendEmail(sellerEmailDetails, mailTransporter);
       if (result !== "success")
         next(new Error(`unable to send email to ${seller.email}`));
     }
