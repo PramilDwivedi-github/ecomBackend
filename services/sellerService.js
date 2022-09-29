@@ -1,4 +1,4 @@
-const { Seller, Product } = require("../models");
+const { Seller, Product, UserImage } = require("../models");
 
 const jwt = require("jsonwebtoken");
 const { generateToken } = require("./authService");
@@ -53,10 +53,33 @@ const loginSeller = async (req, res, next) => {
 const getSeller = async (req, res, next) => {
   try {
     const data = await Seller.findOne({ where: { email: req.UserData.email } });
-    res.status(200).send({ message: "success", data });
+    const img = await data.getUserImage();
+    res.status(200).send({ message: "success", data, img });
   } catch (e) {
     e.message = "Unable to fetch data right now";
     next(e);
+  }
+};
+
+const addProfileImg = async (req, res, next) => {
+  try {
+    const seller = await Seller.findByPk(req.UserData.id);
+    const image = await seller.getUserImage();
+
+    if (image) {
+      await UserImage.update(
+        { img: req.body.userImage },
+        { where: { SellerId: req.UserData.id } }
+      );
+      res.send({ message: "Updated" });
+    } else {
+      const uploadedImage = await UserImage.create({ img: req.body.userImage });
+      await uploadedImage.setSeller(seller);
+      res.send({ message: "Upload Successfull", img: uploadedImage });
+    }
+  } catch (e) {
+    e.message = "unable to add image";
+    next();
   }
 };
 
@@ -152,4 +175,5 @@ module.exports = {
   myProducts,
   removeProduct,
   updateProduct,
+  addProfileImg,
 };

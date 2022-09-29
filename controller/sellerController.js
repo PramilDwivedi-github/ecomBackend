@@ -9,6 +9,7 @@ const {
   myProducts,
   removeProduct,
   updateProduct,
+  addProfileImg,
 } = require("../services/sellerService");
 
 const sellerRouter = express.Router();
@@ -27,5 +28,6 @@ sellerRouter.get("/api/myProducts", myProducts);
 sellerRouter.delete("/api/removeProducts", removeProduct);
 
 sellerRouter.put("/api/updateProduct", updateProduct);
+sellerRouter.post("/api/profileImage", addProfileImg);
 
 module.exports = sellerRouter;

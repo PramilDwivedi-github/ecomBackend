@@ -12,6 +12,7 @@ const {
   UserImage,
 } = require("../models");
 const { generateToken } = require("../services/authService");
+const { sendEmail, mailTransporter } = require("./emailService");
 
 const registerBuyer = async (req, res, next) => {
   try {
@@ -82,6 +83,7 @@ const addProfileImg = async (req, res, next) => {
     }
   } catch (e) {
     e.message = "unable to add image";
+    next();
   }
 };
 
@@ -232,7 +234,50 @@ const placeOrder = async (req, res, next) => {
     }
 
     await newOrder.addSales(newSales);
+
     res.send({ message: "order placed", data: newOrder });
+
+    // sending email to buyer
+    const firstOrderItem = await Product.findByPk(newOrderItems[0].product_id);
+    let buyerText = `Greetings from Shopzee ,
+    your order of ${firstOrderItem.name} and ${newOrderItems.length - 1}
+    more items with orderid ${newOrder.id} is placed successfully. 
+    `;
+
+    const buyerEmailDetails = {
+      from: process.env.email,
+      to: buyer.email,
+      subject: "Shopzee Order Placed!!",
+      text: buyerText,
+    };
+
+    const result = await sendEmail(mailTransporter, buyerEmailDetails);
+    if (result !== "success") next(new Error("unable to send email to buyer"));
+
+    // sending email to seller
+    const sellerEmailDetails = {
+      from: process.env.email,
+      to: "",
+      subject: "New Sale Initiated",
+      text: "",
+    };
+
+    for await (let item of Object.entries(saleMap)) {
+      const firstSaleItem = await Product.findByPk(item[1][0].product_id);
+      const seller = await Seller.findByPk(item[0]);
+      sellerEmailDetails.to = seller.email;
+      let sellerText = `You have new sale of ${firstSaleItem.name} +${
+        item[1].length - 1
+      } more
+      items with saleid ${
+        item[1][0].SaleId
+      } , please process the order delivery.
+      `;
+      sellerEmailDetails.text = sellerText;
+      let result = await sendEmail(mailTransporter, sellerEmailDetails);
+      if (result !== "success")
+        next(new Error(`unable to send email to ${seller.email}`));
+    }
   } catch (e) {
     console.log(e);
     e.message = "Unable to Palce Order";
