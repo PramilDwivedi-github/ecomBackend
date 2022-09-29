@@ -252,7 +252,7 @@ const placeOrder = async (req, res, next) => {
     };
 
     const result = await sendEmail(mailTransporter, buyerEmailDetails);
-    if (result !== "success") next(new Error("unable to send email to buyer"));
+    if (result !== "success") next(new Error(result));
 
     // sending email to seller
     const sellerEmailDetails = {
