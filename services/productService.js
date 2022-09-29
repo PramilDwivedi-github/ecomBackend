@@ -1,4 +1,5 @@
 const { Product } = require("../models");
+const { Op } = require("sequelize");
 
 const getAllProducts = async (req, res, next) => {
   try {
@@ -20,4 +21,33 @@ const getProductById = async (req, res, next) => {
     next(e);
   }
 };
-module.exports = { getAllProducts, getProductById };
+
+const filterProducts = async (req, res, next) => {
+  try {
+    const products = await Product.findAll({
+      where: {
+        [Op.and]: {
+          price: {
+            [Op.gte]: req.body.filter.cost[0],
+          },
+        },
+        [Op.and]: {
+          price: {
+            [Op.lte]: req.body.filter.cost[1],
+          },
+        },
+        [Op.and]: {
+          category: {
+            [Op.eq]: req.body.filter.category,
+          },
+        },
+      },
+    });
+    res.status(200).send({ message: "success", products });
+  } catch (e) {
+    console.log(e);
+    e.message = "Unable to filter produt";
+    next(e);
+  }
+};
+module.exports = { getAllProducts, getProductById, filterProducts };
