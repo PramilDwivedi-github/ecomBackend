@@ -10,12 +10,17 @@ const {
   placeOrder,
   myorders,
   addProfileImg,
+  verifyEmail,
+  resetPasswod,
 } = require("../services/buyerService");
 
 const buyerRouter = express.Router();
 
 buyerRouter.post("/api/register", registerBuyer);
 buyerRouter.post("/api/login", loginBuyer);
+
+buyerRouter.post("/api/verifyEmail", verifyEmail);
+buyerRouter.post("/api/resetPassword", resetPasswod);
 
 buyerRouter.use(authenticateToken);
 

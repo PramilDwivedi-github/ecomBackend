@@ -33,6 +33,30 @@ const registerBuyer = async (req, res, next) => {
   }
 };
 
+const verifyEmail = async (req, res, next) => {
+  try {
+    const user = await Buyer.findOne({ where: { email: req.body.email } });
+    if (user) res.send({ message: "verified" });
+    else res.send({ message: "email not exist" });
+  } catch (e) {
+    e.message = "unable to verify email";
+    next(e);
+  }
+};
+
+const resetPasswod = async (req, res, next) => {
+  try {
+    await Buyer.update(
+      { password: req.body.password },
+      { where: { email: req.body.email } }
+    );
+    res.send({ message: "password reset successful" });
+  } catch (e) {
+    e.message = "unable to reset password";
+    next(e);
+  }
+};
+
 const loginBuyer = async (req, res, next) => {
   const data = req.body;
 
@@ -359,4 +383,6 @@ module.exports = {
   placeOrder,
   myorders,
   addProfileImg,
+  verifyEmail,
+  resetPasswod,
 };
