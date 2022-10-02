@@ -157,9 +157,11 @@ const mycart = async (req, res, next) => {
 
     for await (let c of cartItems) {
       let p = await Product.findByPk(c.product_id);
-      let citem = { item_id: c.item_id, copies: c.copies, detail: p };
-      value += c.copies * p.price;
-      products.push(citem);
+      if (p) {
+        let citem = { item_id: c.item_id, copies: c.copies, detail: p };
+        value += c.copies * p.price;
+        products.push(citem);
+      }
     }
     res.send({ message: "success", cartItems: products, cartValue: value });
   } catch (e) {
