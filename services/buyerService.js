@@ -361,7 +361,8 @@ const myorders = async (req, res, next) => {
           address: seller.address,
         };
         order_item.copies = item.copies;
-        order_item.cost = item.copies * product.price;
+        let order_item_cost = item.copies * product.price;
+        order_item.cost = order_item_cost;
         orderDetail.cost += order_item.cost;
         orderDetail.items.push(order_item);
       }
