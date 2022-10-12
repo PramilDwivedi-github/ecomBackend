@@ -350,7 +350,12 @@ const myorders = async (req, res, next) => {
       let order_items = await order.getOrderItems();
 
       for await (let item of order_items) {
-        let order_item = {};
+        let order_item = {
+          product: null,
+          seller: null,
+          cost: 0.0,
+          copies: 0,
+        };
         let product = await Product.findByPk(item.product_id);
         let seller = await Seller.findByPk(item.seller_id);
         order_item.product = product;
