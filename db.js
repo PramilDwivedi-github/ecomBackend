@@ -1,19 +1,15 @@
 const seq = require("sequelize");
 
-// const db  = new seq("postgres","postgres","Pramil@123",{
-//     host:"localhost",
-//     dialect:"postgres",
-//     port:5432
-// })
-
 const db = new seq(
-  "d297vcufotbto",
-  "gwhhixufputqrm",
-  "a8785ae88126a967c04faf661bc2c4c6477db665311e61adc0d2eb84931009af",
-  {
-    host: "ec2-54-159-175-38.compute-1.amazonaws.com",
-    dialect: "postgres",
-    port: 5432,
-  }
-);
+    "pramilgdp",
+    "pramil",
+    "udfUyeIQPeTGgQ7pTRBGSFz2pCMiLUDO",
+    {
+      host: "dpg-cjest6ue546c738qf750-a.singapore-postgres.render.com",
+      dialect: "postgres",
+      port: 5432,
+      dialectOptions: {  ssl: true,
+        native:true},
+    }
+  );
 module.exports = db;
