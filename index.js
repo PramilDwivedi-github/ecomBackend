@@ -58,7 +58,7 @@ app.use((error, req, res, next) => {
 
 db.sync()
   .then((res) => {
-    app.listen(process.env.PORT, () => {
+    app.listen(process.env.PORT || 3000, () => {
       console.log("app runnning!");
       console.log(process.env.tokenKey);
     });
