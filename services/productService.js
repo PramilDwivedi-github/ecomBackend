@@ -4,7 +4,15 @@ const { Op } = require("sequelize");
 const getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.findAll();
-    res.status(200).send({ message: "success", products });
+
+  const allProducts = [];
+
+    for await (let product of products){
+      const productImages = await product.getProductImages();
+      allProducts.push({...product.dataValues,productImages:[...productImages]})
+    }
+
+    res.status(200).send({ message: "success", products:allProducts});
   } catch (e) {
     console.log(e);
     e.message = "Unable to fetch produts";

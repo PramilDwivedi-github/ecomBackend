@@ -15,9 +15,18 @@ const {
 } = require("../models");
 const { generateToken } = require("../services/authService");
 const { sendEmail } = require("./emailService");
+const AuthenticationError = require("../errors/AuthenticationError");
+const { handleError } = require("../errors/handleError");
+const { getValidationResult } = require("../validators/helpers");
+const ValidationError = require("../errors/validationError");
 
 const registerBuyer = async (req, res, next) => {
   try {
+
+    const result = getValidationResult(req);
+    if(result.length)
+      throw new ValidationError(result);
+
     const checkDb = await Buyer.findOne({ where: { email: req.body.email } });
 
     if (checkDb) res.status(201).send({ message: "Email Already registered" });
@@ -28,8 +37,9 @@ const registerBuyer = async (req, res, next) => {
         .send({ message: "Registered successfuly", data: newBuyer });
     }
   } catch (e) {
-    e.message = "unable to reister";
-    next(e);
+    // e.message = "unable to reister";
+    // next(e);
+    next(handleError(e));
   }
 };
 
@@ -58,9 +68,12 @@ const resetPasswod = async (req, res, next) => {
 };
 
 const loginBuyer = async (req, res, next) => {
-  const data = req.body;
-
   try {
+    const result = getValidationResult(req);
+    if(result.length)
+      throw new ValidationError(result);
+
+    const data = req.body;
     const checkBuyer = await Buyer.findOne({
       where: { email: data.email, password: data.password },
     });
@@ -71,12 +84,12 @@ const loginBuyer = async (req, res, next) => {
       });
       res.status(200).send({ message: "logged in successfuly", token });
     } else {
-      res.status(400).send({ message: "invalid credentials" });
+      throw new AuthenticationError(null,"invalid credentials")
     }
   } catch (e) {
     console.log(e);
-    e.message = "Unable to login please try after sometime";
-    next(e);
+    // e.message = "Unable to login please try after sometime";
+    next(handleError(e));
   }
 };
 
@@ -86,8 +99,9 @@ const getBuyer = async (req, res, next) => {
     const img = await data.getUserImage();
     res.status(200).send({ message: "success", data, img });
   } catch (e) {
-    e.message = "Unable to fetch data right now";
-    next(e);
+    // e.message = "Unable to fetch data right now";
+    // next(e);
+    next(handleError(e));
   }
 };
 
@@ -266,27 +280,6 @@ const placeOrder = async (req, res, next) => {
     res.send({ message: "order placed", data: newOrder });
 
     // sending email to buyer
-
-    const oAuth2Client = new google.auth.OAuth2(
-      process.env.CLIENT_ID,
-      process.env.CLIENT_SECRET,
-      process.env.REDIRECT_URI
-    );
-    oAuth2Client.setCredentials({ refresh_token: process.env.REFRESH_TOKEN });
-    const access_token = await oAuth2Client.getAccessToken();
-
-    const mailTransporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        type: "OAuth2",
-        user: process.env.email,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        refreshToken: process.env.REFRESH_TOKEN,
-        accessToken: access_token,
-      },
-    });
-
     const firstOrderItem = await Product.findByPk(newOrderItems[0].product_id);
     let buyerText = `Greetings from Shopzee ,
     your order of ${firstOrderItem.name} and ${newOrderItems.length - 1}
@@ -300,7 +293,7 @@ const placeOrder = async (req, res, next) => {
       text: buyerText,
     };
 
-    const result = await sendEmail(buyerEmailDetails, mailTransporter);
+    const result = await sendEmail(buyerEmailDetails);
     if (result !== "success") next(result);
 
     // sending email to seller
@@ -323,7 +316,7 @@ const placeOrder = async (req, res, next) => {
       } , please process the order delivery.
       `;
       sellerEmailDetails.text = sellerText;
-      let result = await sendEmail(sellerEmailDetails, mailTransporter);
+      let result = await sendEmail(sellerEmailDetails);
       if (result !== "success")
         next(new Error(`unable to send email to ${seller.email}`));
     }

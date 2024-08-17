@@ -1,7 +1,11 @@
-const { Seller, Product, UserImage } = require("../models");
+const fs = require('fs').promises;
+const { Seller, Product, UserImage ,ProductImage } = require("../models");
 
 const jwt = require("jsonwebtoken");
 const { generateToken } = require("./authService");
+const { createFileInFileStore } = require('./fileStoreService');
+const { buckets, getObjectUrl } = require('../Util/Supabase');
+const { url } = require('node:inspector');
 
 const registerSeller = async (req, res, next) => {
   try {
@@ -88,11 +92,40 @@ const addProduct = async (req, res, next) => {
     const seller = await Seller.findOne({
       where: { email: req.UserData.email },
     });
+    console.log(req.body,req.files)
+    // create product 
     const newProduct = await Product.create(req.body);
+
+    // upload images
+    const productImages = [];
+    const imageUploadErrors = [];
+    if(req.files){
+      for await (let img of req.files){
+        try{
+          const fileData = await fs.readFile(img.path);
+
+          const response = await createFileInFileStore(buckets.productImage, img.filename,fileData);
+
+          if(response && response.error) imageUploadErrors.push({filename:img.filename,error:response.error});
+          else if(response && response.data){
+            // create productImage object
+            const imageObject = await ProductImage.create({img_url:getObjectUrl(response.data.fullPath)});
+            productImages.push(imageObject);
+          }
+        
+        }
+        catch(fileReadError){
+          imageUploadErrors.push({filename:img.filename,error:fileReadError});
+        }
+      }
+    }
+    // save product
+    await newProduct.addProductImages(productImages);
     await seller.addProduct(newProduct);
-    res.status(200).send({ message: "product added successfully", newProduct });
+    res.status(200).send({ message: "product added successfully", product:newProduct });
   } catch (e) {
     e.message = "unable to add product";
+    console.log(e);
     next(e);
   }
 };
@@ -118,7 +151,16 @@ const myProducts = async (req, res, next) => {
   try {
     const seller = await Seller.findByPk(req.UserData.id);
     const products = await seller.getProducts();
-    res.status(200).send({ message: "success", products });
+
+    const sellerProducts = [];
+
+    for await (let product of products){
+      const productImages = await product.getProductImages();
+      sellerProducts.push({...product.dataValues,productImages:[...productImages]})
+    }
+
+    console.log(sellerProducts)
+    res.status(200).send({ message: "success", products:sellerProducts});
   } catch (e) {
     console.log(e);
     e.message = "Unable to fetch products";
