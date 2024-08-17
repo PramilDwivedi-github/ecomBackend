@@ -4,8 +4,11 @@ const bodyparser = require("body-parser");
 const db = require("./db");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const path = require("path")
+const fs = require('node:fs');
+const os = require("os")
 
-// const User = require("./models/user")
+
 const {
   Buyer,
   Seller,
@@ -18,11 +21,13 @@ const {
 } = require("./models/index");
 
 const app = express();
+dotenv.config()
 
 const userRouter = require("./controller/userController");
 const sellerRouter = require("./controller/sellerController");
 const buyerRouter = require("./controller/buyerController");
 const productRouter = require("./controller/productController");
+const fileStoreController = require("./controller/fileStoreController");
 // cors issue
 const whitelist = [
   "http://localhost:3000",
@@ -41,26 +46,27 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 //body parser middleware
-app.use(bodyparser.json({ limit: "15360mb" }));
+app.use(bodyparser.json())
 
-dotenv.config();
 
 app.use("/seller", sellerRouter);
-app.use("/buyer", buyerRouter);
-app.use("/product", productRouter);
+app.use("/buyer",buyerRouter);
+app.use("/product",productRouter);
+
+
+app.use('/filestore',fileStoreController);
 
 app.use((error, req, res, next) => {
   console.log(error);
-  res.send({ message: error.message });
+  res.status(error.statusCode).send({ message: error.message , errors: error.errors });
 });
 
 // const port = 3000;
 
 db.sync()
   .then((res) => {
-    app.listen(process.env.PORT || 3000, () => {
+    app.listen(process.env.PORT || 3001, () => {
       console.log("app runnning!");
-      console.log(process.env.tokenKey);
     });
   })
   .catch((err) => console.log(err));

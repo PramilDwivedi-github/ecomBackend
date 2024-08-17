@@ -3,6 +3,7 @@ const CartItem = require("./cartItem");
 const Order = require("./order");
 const OrderItem = require("./orderItem");
 const Product = require("./product");
+const ProductImage = require("./ProductImage");
 const Sale = require("./sale");
 const SaleItem = require("./SaleItem");
 const Seller = require("./Seller");
@@ -45,6 +46,10 @@ Seller.hasOne(UserImage);
 UserImage.belongsTo(Buyer);
 UserImage.belongsTo(Seller);
 
+// Product has many images
+Product.hasMany(ProductImage);
+ProductImage.belongsTo(Product);
+
 module.exports = {
   Buyer,
   Seller,
@@ -55,4 +60,5 @@ module.exports = {
   Sale,
   SaleItem,
   UserImage,
+  ProductImage
 };
