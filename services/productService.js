@@ -22,7 +22,8 @@ const getAllProducts = async (req, res, next) => {
 const getProductById = async (req, res, next) => {
   try {
     const product = await Product.findByPk(req.params.id);
-    res.status(200).send({ message: "success", product });
+    const productImages = await product.getProductImages();
+    res.status(200).send({ message: "success", product:{...product.dataValues,productImages:productImages} });
   } catch (e) {
     console.log(e);
     e.message = "Unable to fetch produt";

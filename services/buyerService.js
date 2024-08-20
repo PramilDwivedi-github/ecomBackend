@@ -19,6 +19,7 @@ const AuthenticationError = require("../errors/AuthenticationError");
 const { handleError } = require("../errors/handleError");
 const { getValidationResult } = require("../validators/helpers");
 const ValidationError = require("../errors/validationError");
+const { validateRemoveCartItem } = require("../validators/buyerValidators");
 
 const registerBuyer = async (req, res, next) => {
   try {
@@ -172,7 +173,9 @@ const mycart = async (req, res, next) => {
     for await (let c of cartItems) {
       let p = await Product.findByPk(c.product_id);
       if (p) {
+        const images = await p.getProductImages();
         let citem = { item_id: c.item_id, copies: c.copies, detail: p };
+        citem.detail.img = images && images.length && images[0];
         value += c.copies * p.price;
         products.push(citem);
       }
@@ -187,6 +190,7 @@ const mycart = async (req, res, next) => {
 
 const removeCartItem = async (req, res, next) => {
   try {
+    await validateRemoveCartItem(req.body.item_id,req.UserData.id);
     await CartItem.destroy({ where: { item_id: req.body.item_id } });
     res.send({ message: "Deleted Cart Item" });
   } catch (e) {

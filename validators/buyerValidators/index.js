@@ -17,17 +17,17 @@ const registerValidations = [
     body("phone").isMobilePhone("en-IN").withMessage("Phone number is invalid!")
 ]
 
-const validateRemoveCartItem  = async (req,res,next)=>{
-    body("item_id").custom(async (value, { req }) => {
+const validateRemoveCartItem  = async (item_id,buyerId)=>{
+    const buyer = await Buyer.findByPk(buyerId);
+    const cartItems = await buyer.getCartItems();
 
-        const buyer = await Buyer.findByPk(req.UserData.id);
-        const cartItems = await buyer.getCartItems();
-        const itemToDelete = cartItems.find(item=> item.item_id === req.body.item_id )
-        console.log(itemToDelete)
-        if(!itemToDelete)
-            throw new ValidationError("Cart Item does not exist!")
-      }).withMessage("Item Id is invalid!")         
+    const itemToDelete =  cartItems.find(item=> item.dataValues.item_id === item_id )
+    console.log(cartItems[0].dataValues,cartItems,item_id)
+    if(!itemToDelete)
+        throw new ValidationError("Cart Item does not exist!")
+    return;
 }
+
 
 
 const validateLogin = validate(loginValidations);
