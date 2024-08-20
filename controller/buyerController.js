@@ -13,7 +13,7 @@ const {
   verifyEmail,
   resetPasswod,
 } = require("../services/buyerService");
-const { validateLogin, validateRegister, validateRemoveCartItem } = require("../validators/buyerValidators");
+const { validateLogin, validateRegister } = require("../validators/buyerValidators");
 
 
 const buyerRouter = express.Router();
@@ -29,7 +29,7 @@ buyerRouter.use(authenticateToken);
 buyerRouter.get("/api/data", getBuyer);
 buyerRouter.post("/api/addCartItem", addCartItem);
 buyerRouter.get("/api/mycart", mycart);
-buyerRouter.delete("/api/removeCartItem",validateRemoveCartItem, removeCartItem);
+buyerRouter.delete("/api/removeCartItem", removeCartItem);
 
 buyerRouter.post("/api/placeOrder", placeOrder);
 buyerRouter.get("/api/myorders", myorders);
