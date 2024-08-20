@@ -66,7 +66,7 @@ app.use((error, req, res, next) => {
 db.sync()
   .then((res) => {
     app.listen(process.env.PORT || 3001, () => {
-      console.log("app runnning!");
+      console.log("app runnning! on port", process.env.PORT || 3001);
     });
   })
   .catch((err) => console.log(err));
